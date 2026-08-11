@@ -17,3 +17,6 @@ capacity = 1
 # functions/ is served at https://<subdomain>.functions.<region>.nhost.run/v1/
 [functions.node]
 version = 22
+
+[observability.grafana]
+adminPassword = "{{ secrets.NHOST_GRAFANA_ADMIN_PASSWORD }}"
