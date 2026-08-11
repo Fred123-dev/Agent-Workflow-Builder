@@ -1,0 +1,64 @@
+actions:
+  - name: triggerWorkflowRun
+    definition:
+      kind: synchronous
+      handler: '{{ACTIONS_BASE_URL}}/triggerWorkflowRun'
+      forward_client_headers: true
+      headers:
+        - name: x-action-secret
+          value_from_env: ACTION_SECRET
+    permissions:
+      - role: user
+
+  - name: approveStep
+    definition:
+      kind: synchronous
+      handler: '{{ACTIONS_BASE_URL}}/approveStep'
+      forward_client_headers: true
+      headers:
+        - name: x-action-secret
+          value_from_env: ACTION_SECRET
+    permissions:
+      - role: user
+
+  - name: webhookTrigger
+    definition:
+      kind: synchronous
+      handler: '{{ACTIONS_BASE_URL}}/webhookTrigger'
+      # No forward_client_headers: external systems calling this have no
+      # Hasura session at all. Authorization is entirely inside the
+      # handler, via the per-trigger secret stored on workflow_triggers.config
+      # (see functions/webhookTrigger.js).
+      headers:
+        - name: x-action-secret
+          value_from_env: ACTION_SECRET
+    permissions:
+      # `public` is nhost/Hasura's built-in unauthenticated role — this is
+      # the actual "inbound endpoint external systems call to start a run"
+      # the assignment asks for. It carries no identity; the handler's own
+      # secret check is the only gate.
+      - role: public
+
+custom_types:
+  enums: []
+  input_objects: []
+  objects:
+    - name: TriggerWorkflowRunOutput
+      fields:
+        - name: workflow_run_id
+          type: uuid!
+        - name: status
+          type: String!
+    - name: ApproveStepOutput
+      fields:
+        - name: step_run_id
+          type: uuid!
+        - name: status
+          type: String!
+    - name: WebhookTriggerOutput
+      fields:
+        - name: workflow_run_id
+          type: uuid!
+        - name: status
+          type: String!
+  scalars: []

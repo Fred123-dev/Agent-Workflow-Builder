@@ -1,0 +1,52 @@
+type TriggerWorkflowRunOutput {
+  workflow_run_id: uuid!
+  status: String!
+}
+
+type ApproveStepOutput {
+  step_run_id: uuid!
+  status: String!
+}
+
+type WebhookTriggerOutput {
+  workflow_run_id: uuid!
+  status: String!
+}
+
+input TriggerWorkflowRunInput {
+  workflow_id: uuid!
+}
+
+input ApproveStepInput {
+  step_run_id: uuid!
+  approve: Boolean!
+}
+
+input WebhookTriggerInput {
+  trigger_id: uuid!
+  secret: String!
+}
+
+type Mutation {
+  """
+  Starts a run: verifies org role, checks quota, creates workflow_run,
+  executes steps in order, pauses on approval_gate. Callable by any
+  authenticated user; the handler itself rejects non owner/editor callers.
+  """
+  triggerWorkflowRun(workflow_id: uuid!): TriggerWorkflowRunOutput
+
+  """
+  Resumes a paused run after an approval_gate step. The handler checks the
+  caller's org role before resuming — this is a mid-execution authorization
+  decision, not a static row permission.
+  """
+  approveStep(step_run_id: uuid!, approve: Boolean!): ApproveStepOutput
+
+  """
+  Public inbound endpoint for the "webhook" trigger type. Callable by
+  anyone (unauthenticated `public` role) — authorization is entirely via
+  matching `secret` against the trigger's stored config.secret, since an
+  external caller has no Hasura session/org role to check.
+  """
+  webhookTrigger(trigger_id: uuid!, secret: String!): WebhookTriggerOutput
+}

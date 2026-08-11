@@ -1,0 +1,40 @@
+table:
+  schema: public
+  name: organizations
+array_relationships:
+  - name: members
+    using:
+      foreign_key_constraint_on:
+        column: org_id
+        table:
+          schema: public
+          name: org_members
+  - name: workflows
+    using:
+      foreign_key_constraint_on:
+        column: org_id
+        table:
+          schema: public
+          name: workflows
+object_relationships:
+  - name: usage
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: org_usage_this_month
+        column_mapping:
+          id: org_id
+select_permissions:
+  # Layer 1: any authenticated user may only see orgs they are a member of.
+  # NOTE: single Hasura role "user" is used for ALL authenticated requests;
+  # per-org role (owner/editor/viewer) is resolved by joining org_members in
+  # every permission filter below, never from a static JWT claim, because a
+  # user's role can differ across organizations.
+  - role: user
+    permission:
+      columns: [id, name, quota_calls_allowed, quota_period_start, created_at]
+      filter:
+        members:
+          user_id:
+            _eq: X-Hasura-User-Id

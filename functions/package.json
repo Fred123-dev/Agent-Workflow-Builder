@@ -1,0 +1,11 @@
+{
+  "name": "agent-workflow-builder-functions",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "cron-parser": "^4.9.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

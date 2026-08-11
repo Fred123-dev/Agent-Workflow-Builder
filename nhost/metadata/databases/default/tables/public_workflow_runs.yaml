@@ -1,0 +1,29 @@
+table:
+  schema: public
+  name: workflow_runs
+object_relationships:
+  - name: workflow
+    using:
+      foreign_key_constraint_on: workflow_id
+array_relationships:
+  - name: step_runs
+    using:
+      foreign_key_constraint_on:
+        column: workflow_run_id
+        table:
+          schema: public
+          name: step_runs
+select_permissions:
+  # Read-only for clients (viewers included — everyone can watch a run).
+  # Rows are only ever written by the triggerWorkflowRun / approveStep
+  # Action handlers using the admin secret, never directly by a client role —
+  # starting/advancing a run is a mid-execution decision (quota check, org
+  # role check, retry logic) that a static row permission can't express.
+  - role: user
+    permission:
+      columns: [id, workflow_id, org_id, status, triggered_by, trigger_type, started_at, finished_at]
+      filter:
+        org:
+          members:
+            user_id:
+              _eq: X-Hasura-User-Id

@@ -1,0 +1,11 @@
+# nhost project config — created by `nhost init`, edit as needed.
+[hasura]
+version = "v2.36.0"
+adminSecret = "%{HASURA_ADMIN_SECRET}"
+
+[auth]
+version = "0.32.0"
+
+[functions]
+# functions/ is served at https://<subdomain>.functions.<region>.nhost.run/v1/
+node_version = "18"

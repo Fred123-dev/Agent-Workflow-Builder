@@ -1,0 +1,66 @@
+table:
+  schema: public
+  name: workflow_triggers
+object_relationships:
+  - name: workflow
+    using:
+      foreign_key_constraint_on: workflow_id
+select_permissions:
+  - role: user
+    permission:
+      columns: [id, workflow_id, org_id, type, config, is_active, created_at]
+      filter:
+        org:
+          members:
+            user_id:
+              _eq: X-Hasura-User-Id
+insert_permissions:
+  # notify steps live on workflow_steps and are gated there; webhook triggers
+  # are gated here — owners only, since a webhook is an inbound endpoint
+  # external systems can call, i.e. it reaches INTO the sandbox.
+  - role: user
+    permission:
+      columns: [workflow_id, type, config, is_active]
+      check:
+        _or:
+          - workflow:
+              org:
+                members:
+                  user_id:
+                    _eq: X-Hasura-User-Id
+                  role:
+                    _eq: owner
+          - _and:
+              - workflow:
+                  org:
+                    members:
+                      user_id:
+                        _eq: X-Hasura-User-Id
+                      role:
+                        _eq: editor
+              - type:
+                  _neq: webhook
+update_permissions:
+  - role: user
+    permission:
+      columns: [config, is_active]
+      filter:
+        workflow:
+          org:
+            members:
+              user_id:
+                _eq: X-Hasura-User-Id
+              role:
+                _in: [owner, editor]
+      check: null
+delete_permissions:
+  - role: user
+    permission:
+      filter:
+        workflow:
+          org:
+            members:
+              user_id:
+                _eq: X-Hasura-User-Id
+              role:
+                _eq: owner

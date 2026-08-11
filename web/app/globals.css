@@ -1,0 +1,43 @@
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, Inter, system-ui, sans-serif;
+  background: #0b0d12;
+  color: #e7e9ee;
+  margin: 0;
+}
+.card {
+  background: #12151c;
+  border: 1px solid #232735;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+button {
+  background: #4f6df5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+}
+button:disabled { background: #333849; cursor: not-allowed; }
+button.secondary { background: #232735; }
+input, select, textarea {
+  background: #0b0d12;
+  border: 1px solid #333849;
+  color: #e7e9ee;
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge.pending, .badge.running { background: #2a3a5c; color: #8fb1ff; }
+.badge.succeeded { background: #1f3d2b; color: #7fe3a3; }
+.badge.failed { background: #3d1f1f; color: #ff9a9a; }
+.badge.paused, .badge.paused_awaiting_approval { background: #453a1f; color: #ffd27f; }
