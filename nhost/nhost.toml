@@ -8,7 +8,7 @@ type = "HS256"
 key = "{{ secrets.NHOST_JWT_SECRET }}"
 
 [auth]
-version = "0.32.0"
+version = "0.38.1"
 
 [postgres.resources.storage]
 capacity = 1
