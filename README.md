@@ -21,15 +21,34 @@ web/                                  # Next.js frontend
 
 ### 1. nhost project
 
-```bash
-npm install -g nhost
-nhost init            # or: nhost login && nhost link (existing project)
-cp -r <this repo>/nhost/* .           # merge migrations/metadata into your nhost dir
-nhost up               # local dev stack, or `nhost deploy` for cloud
-```
+The Nhost CLI only ships native binaries for macOS/Linux (Windows needs
+WSL2), so the path below is the GitHub-connected cloud deploy, which works
+from any OS and needs no CLI at all:
 
-Apply migrations + metadata:
+1. Create a project at [app.nhost.io](https://app.nhost.io).
+2. From the project's **Deployments** page, connect your GitHub repo. Set
+   **Base Directory** to `./` (this repo's `nhost/` and `functions/`
+   directories already sit at the repo root, matching what Nhost expects)
+   and **Deployment Branch** to whatever your default branch actually is —
+   the dashboard defaults this field to `main`, so if your repo uses
+   `master` (`git branch` will tell you), change it or nothing will ever
+   deploy.
+3. Under **Environment Variables**, set:
+   ```
+   ACTION_SECRET=<any random string — shared with actions.yaml/event triggers>
+   ACTIONS_BASE_URL=https://<subdomain>.functions.<region>.nhost.run/v1
+   GROQ_API_KEY=<optional — omit to use the stubbed llm_call fallback>
+   ```
+   (subdomain/region are shown on the project overview page).
+4. Push a commit to the deployment branch. Migrations, Hasura metadata, and
+   `functions/` all deploy together automatically on every push after that.
+
+If you're on macOS/Linux/WSL2 and prefer the CLI instead:
 ```bash
+npm install -g @nhost/cli
+nhost login && nhost init      # or `nhost link` for an existing project
+cp -r <this repo>/nhost/* .    # merge migrations/metadata into your nhost dir
+nhost up                        # local dev stack, or `nhost deploy` for cloud
 nhost hasura migrate apply --database-name default
 nhost hasura metadata apply
 ```
@@ -40,24 +59,22 @@ nhost auto-serves everything in `functions/` at
 `https://<subdomain>.functions.<region>.nhost.run/v1/<filename>`. Locally,
 `nhost up` serves them at `http://localhost:1337/v1/functions/<filename>`.
 
-Set these env vars (nhost project → Settings → Environment Variables, or
-`.env.development` for local):
-
-```
-HASURA_GRAPHQL_URL=https://<subdomain>.hasura.<region>.nhost.run/v1/graphql
-HASURA_ADMIN_SECRET=<from nhost dashboard>
-ACTION_SECRET=<any random string — shared with actions.yaml/event triggers>
-GROQ_API_KEY=<optional — omit to use the stubbed llm_call fallback>
-```
-
-Then in `nhost/metadata/actions.yaml` and the two `event_triggers:` blocks,
-replace `{{ACTIONS_BASE_URL}}` with your actual functions base URL (nhost's
-metadata doesn't support env interpolation in webhook URLs the way it does
-for headers — either hardcode it or use `nhost hasura metadata apply`
-with an env-substituted copy).
+`nhost/metadata/actions.yaml` and the two `event_triggers:` blocks reference
+the functions base URL as `{{ACTIONS_BASE_URL}}` — Hasura resolves `{{...}}`
+in action handler / webhook URLs from an env var of that name on the Hasura
+instance at request time (see step 1.3 above), so no per-environment editing
+of the metadata files is needed.
 
 ### 3. Web app
 
+Dashboard deploy (Vercel):
+1. [vercel.com](https://vercel.com) → **Add New Project** → import this repo.
+2. Set **Root Directory** to `web`.
+3. Add env vars `NEXT_PUBLIC_NHOST_SUBDOMAIN` / `NEXT_PUBLIC_NHOST_REGION`
+   (same subdomain/region as step 1).
+4. Deploy — every push to the connected branch redeploys automatically.
+
+Local dev / CLI deploy:
 ```bash
 cd web
 cp .env.example .env.local   # fill in NEXT_PUBLIC_NHOST_SUBDOMAIN / _REGION
