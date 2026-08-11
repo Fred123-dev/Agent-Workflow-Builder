@@ -3,6 +3,10 @@
 version = "v2.36.0"
 adminSecret = "%{HASURA_ADMIN_SECRET}"
 
+[[hasura.jwtSecrets]]
+type = "HS256"
+key = "{{ secrets.NHOST_JWT_SECRET }}"
+
 [auth]
 version = "0.32.0"
 
