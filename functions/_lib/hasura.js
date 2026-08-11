@@ -4,8 +4,12 @@
 // step_runs, tables that have no client-facing insert/update permission
 // (see nhost/metadata/databases/default/tables/public_workflow_runs.yaml).
 
-const HASURA_URL = process.env.HASURA_GRAPHQL_URL; // e.g. https://<subdomain>.hasura.<region>.nhost.run/v1/graphql
-const ADMIN_SECRET = process.env.HASURA_ADMIN_SECRET;
+// NHOST_GRAPHQL_URL / NHOST_ADMIN_SECRET are auto-injected by Nhost into
+// every service's environment — no manual env var configuration needed.
+// (HASURA_GRAPHQL_URL / HASURA_ADMIN_SECRET are accepted as a fallback for
+// local/non-Nhost setups.)
+const HASURA_URL = process.env.NHOST_GRAPHQL_URL || process.env.HASURA_GRAPHQL_URL;
+const ADMIN_SECRET = process.env.NHOST_ADMIN_SECRET || process.env.HASURA_ADMIN_SECRET;
 
 async function gql(query, variables = {}) {
   const res = await fetch(HASURA_URL, {
