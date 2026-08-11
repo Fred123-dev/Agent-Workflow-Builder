@@ -8,4 +8,5 @@ version = "0.32.0"
 
 [functions]
 # functions/ is served at https://<subdomain>.functions.<region>.nhost.run/v1/
-node_version = "18"
+[functions.node]
+version = 22
