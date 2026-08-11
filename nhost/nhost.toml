@@ -1,7 +1,7 @@
 # nhost project config — created by `nhost init`, edit as needed.
 [hasura]
 version = "v2.36.0"
-adminSecret = "%{HASURA_ADMIN_SECRET}"
+adminSecret = "{{ secrets.HASURA_GRAPHQL_ADMIN_SECRET }}"
 
 [[hasura.jwtSecrets]]
 type = "HS256"
